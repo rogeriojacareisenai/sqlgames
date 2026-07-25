@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendendo SQL - Bregolete</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height:100vh;
+            background:linear-gradient(135deg,#0f172a,#1e293b);
+        }
+
+        .container{
+            display:flex;
+            height:100vh;
+        }
+
+        /* COLUNA ESQUERDA */
+        .left{
+            flex:1;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+        }
+
+        .left img{
+            width:100%;
+            max-width:420px;
+            border-radius:20px;
+            box-shadow:
+                0 20px 50px rgba(0,0,0,.45);
+        }
+
+        /* COLUNA DIREITA */
+        .right{
+            flex:2;
+            background:#f8fafc;
+            padding:50px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .logo{
+            margin-bottom:40px;
+        }
+
+        .logo h1{
+            font-size:42px;
+            color:#0f172a;
+            margin-bottom:10px;
+        }
+
+        .logo p{
+            color:#64748b;
+            font-size:18px;
+        }
+
+        .menu{
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+        }
+
+        .card{
+            display:flex;
+            align-items:center;
+            gap:20px;
+
+            padding:25px;
+
+            border-radius:18px;
+
+            color:white;
+            cursor:pointer;
+
+            transition:all .3s ease;
+
+            box-shadow:
+                0 8px 20px rgba(0,0,0,.15);
+        }
+
+        .card:hover{
+            transform:translateX(10px);
+            box-shadow:
+                0 15px 30px rgba(0,0,0,.25);
+        }
+
+        .icon{
+            font-size:42px;
+            min-width:60px;
+            text-align:center;
+        }
+
+        .card h2{
+            font-size:24px;
+            margin-bottom:5px;
+        }
+
+        .card p{
+            font-size:15px;
+            opacity:.95;
+        }
+
+        .create{
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+        }
+
+        .insert{
+            background:linear-gradient(135deg,#10b981,#059669);
+        }
+
+        .select{
+            background:linear-gradient(135deg,#f59e0b,#d97706);
+        }
+
+        .update{
+            background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+        }
+
+        .delete{
+            background:linear-gradient(135deg,#ef4444,#dc2626);
+        }
+
+        /* RODAPÉ */
+
+        .footer{
+            margin-top:40px;
+            padding-top:20px;
+            border-top:1px solid #e2e8f0;
+
+            text-align:center;
+
+            color:#64748b;
+            font-size:14px;
+            line-height:1.8;
+        }
+
+        .footer strong{
+            color:#0f172a;
+        }
+
+        /* RESPONSIVO */
+
+        @media (max-width:900px){
+
+            .container{
+                flex-direction:column;
+            }
+
+            .left{
+                height:35vh;
+            }
+
+            .left img{
+                max-height:300px;
+                width:auto;
+            }
+
+            .right{
+                padding:25px;
+            }
+
+            .logo h1{
+                font-size:32px;
+            }
+
+            .card h2{
+                font-size:20px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- IMAGEM -->
+
+    <div class="left">
+        <img src="menusql.png" alt="Aprendendo SQL">
+    </div>
+
+    <!-- MENU -->
+
+    <div class="right">
+
+        <div class="logo">
+            <h1>📘 Aprendendo SQL</h1>
+            <p>Curso Prático SQL • Bregolete</p>
+        </div>
+
+        <div class="menu">
+
+            <div class="card create"
+                 onclick="location.href='createtable.html'">
+
+                <div class="icon">🏗️</div>
+
+                <div>
+                    <h2>CREATE TABLE</h2>
+                    <p>Criar tabelas e definir estruturas de dados.</p>
+                </div>
+
+            </div>
+
+            <div class="card insert"
+                 onclick="location.href='insert.html'">
+
+                <div class="icon">➕</div>
+
+                <div>
+                    <h2>INSERT</h2>
+                    <p>Inserir registros em tabelas SQL.</p>
+                </div>
+
+            </div>
+
+            <div class="card select"
+                 onclick="location.href='select.html'">
+
+                <div class="icon">🔍</div>
+
+                <div>
+                    <h2>SELECT</h2>
+                    <p>Consultar informações armazenadas.</p>
+                </div>
+
+            </div>
+
+            <div class="card update"
+                 onclick="location.href='update.html'">
+
+                <div class="icon">✏️</div>
+
+                <div>
+                    <h2>UPDATE</h2>
+                    <p>Atualizar registros existentes.</p>
+                </div>
+
+            </div>
+
+            <div class="card delete"
+                 onclick="location.href='delete.html'">
+
+                <div class="icon">🗑️</div>
+
+                <div>
+                    <h2>DELETE</h2>
+                    <p>Excluir registros da tabela.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="footer">
+            © <span id="ano"></span> Todos os direitos reservados<br>
+            <strong>Rogério B. de Andrade</strong>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    document.getElementById("ano").innerHTML =
+        new Date().getFullYear();
+</script>
+
+</body>
+</html>
