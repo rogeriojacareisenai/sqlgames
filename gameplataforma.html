@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Plataforma</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+
+        canvas {
+            border: 0px solid black;
+            display: block;
+        }
+
+        #menu {
+            position: absolute;
+            width: 400px;
+            padding: 40px;
+            background: white;
+            border: 3px solid #003366;
+            border-radius: 15px;
+            text-align: center;
+            font-family: Arial;
+            z-index: 10;
+        }
+
+        #menu h1 {
+            color: #003366;
+        }
+
+        #menu button {
+            display: block;
+            width: 250px;
+            margin: 20px auto;
+            padding: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 10px;
+        }
+
+        #menu button:hover {
+            background: #004080;
+        }
+
+        #game {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="menu">
+        <h1>Jogo de Algoritmos</h1>
+
+        <button onclick="iniciarJogo(1)">
+            Algoritmo Soma
+        </button>
+
+        <button onclick="iniciarJogo(2)">
+            Algoritmo Par ou Ímpar
+        </button>
+
+        <button onclick="iniciarJogo(3)">
+            Algoritmo Quadrado
+        </button>
+
+    </div>
+
+    <canvas id="game"></canvas>
+
+    <script>
+        let jogoIniciado = false;
+        let mostrarComandosColetados = false;
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        //------------------------------------------------------
+        // PERSONAGEM
+        //------------------------------------------------------
+        const player = {
+            x: 50,
+            y: 100,
+            width: 80,
+            height: 80,
+            velY: 0,
+            gravidade: 0.5,
+            pulo: -15,
+            velocidadeX: 8,
+            noChao: false
+        };
+        //------------------------------------------------------
+        // CÂMERA E MUNDO
+        //------------------------------------------------------
+        const fundo = new Image();
+        fundo.src = "anima/cenario.png"; // caminho da imagem
+        const mundo = {
+            width: 4000,
+            height: 800
+        };
+        const camera = {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
+            velocidade: 0.10
+        };
+
+        let comandos = [];
+        let algoritmoSQL = [
+            {
+                comando: "algoritmo soma",
+                explicacao: "Inicia o algoritmo e define seu nome."
+            },
+            {
+                comando: "var",
+                explicacao: "Indica o início da declaração das variáveis."
+            },
+            {
+                comando: "num1, num2, resp: inteiro",
+                explicacao: "Declara as variáveis num1, num2 e resp do tipo inteiro."
+            },
+            {
+                comando: "inicio",
+                explicacao: "Marca o início da execução do algoritmo."
+            },
+            {
+                comando: "     leia(num1)",
+                explicacao: "Lê um valor informado pelo usuário e armazena em num1."
+            },
+            {
+                comando: "     leia(num2)",
+                explicacao: "Lê um valor informado pelo usuário e armazena em num2."
+            },
+            {
+                comando: "     resp<-num1+num2",
+                explicacao: "Calcula a soma de num1 e num2 e guarda o resultado em resp."
+            },
+            {
+                comando: "     escreva(resp)",
+                explicacao: "Exibe o conteúdo da variável resp."
+            },
+            {
+                comando: "fimalgoritmo",
+                explicacao: "Finaliza o algoritmo."
+            }
+        ];
+
+        
+
+
+        var total_comandos = algoritmoSQL.length
+
+
+        //------------------------------------------------------
+        // PLATAFORMAS
+        //------------------------------------------------------
+        let plataformas = [];
+        function criarPlataformas() {
+            plataformas = [];
+            comandos = [];
+            // embaralha os comandos
+            let textosAleatorios = [...algoritmoSQL];
+            textosAleatorios.sort(() => Math.random() - 0.5);
+            let quantidade = textosAleatorios.length;
+            let largura = 180;
+            const MARGEM_TETO = 200;
+            const MARGEM_CHAO = 200;
+
+            const yChao = canvas.height - 258;
+
+            let alturaMin = MARGEM_TETO;
+            let alturaMax = yChao - MARGEM_CHAO;
+            for (let i = 0; i < quantidade; i++) {
+                let tentativa = 0;
+                let x;
+                let y;
+                // tenta encontrar uma posição boa
+                do {
+                    // posição horizontal livre
+                    x = Math.random() *
+                        (mundo.width - largura);
+                    // posição vertical
+                    y = alturaMin +
+                        Math.random() *
+                        (alturaMax - alturaMin);
+                    tentativa++;
+                    // evita ficar muito perto de outra plataforma
+                    let conflito = plataformas.some(p => {
+                        let distanciaX =
+                            Math.abs(
+                                (x + largura / 2) -
+                                (p.x + p.width / 2)
+                            );
+                        let distanciaY =
+                            Math.abs(
+                                y - p.y
+                            );
+                        return (
+                            distanciaX < 100 &&
+                            distanciaY < 70
+                        );
+                    });
+                    if (!conflito)
+                        break;
+                } while (tentativa < 100);
+                //----------------------------------
+                // cria plataforma
+                //----------------------------------
+                plataformas.push({
+                    x: x,
+                    y: y,
+                    width: largura,
+                    height: 20,
+                    tipo: 'plataforma'
+                });
+                //----------------------------------
+                // cria texto
+                //----------------------------------
+                comandos.push({
+                    texto: textosAleatorios[i].comando,
+                    explicacao: textosAleatorios[i].explicacao,
+                    x: x,
+                    y: y - 35,
+                    width: largura,
+                    height: 30,
+                    coletado: false
+                });
+            }
+
+            // ============================
+            // PLATAFORMA DO CHÃO
+            // ============================
+            plataformas.push({
+                x: 0,
+                y: canvas.height - 300,
+                width: mundo.width,
+                height: 2,
+                tipo: "chao"
+            });
+        }
+        //------------------------------------------------------
+        // OBJETOS COLECIONÁVEIS
+        //------------------------------------------------------
+
+        let objetos = [];
+        function criarObjetos() {
+            objetos = [];
+            for (let comando of comandos) {
+                objetos.push({
+                    x: comando.x + comando.width / 2 - 10,
+                    y: comando.y - 30,
+                    width: 20,
+                    height: 20,
+                    texto: comando.texto,
+                    coletado: false,
+                    explicacao: comando.explicacao
+                });
+            }
+        }
+
+
+        //------------------------------------------------------
+        // AJUSTAR O CANVAS
+        //------------------------------------------------------
+        //------------------------------------------------------
+        // ANIMAÇÃO DO MOUSE
+        //------------------------------------------------------
+
+        const sprites = [];
+        const TOTAL_SPRITES = 5; // sprites 01 até 05 (animação)
+
+        for (let i = 0; i <= TOTAL_SPRITES; i++) {
+            const img = new Image();
+            img.src = "anima/sprite_" + String(i).padStart(2, "0") + ".png";
+            sprites.push(img);
+        }
+
+        const spritePulo = new Image();
+        spritePulo.src = "anima/sprite_09.png";
+
+        const spriteCorda = new Image();
+        spriteCorda.src = "anima/corda.png";
+
+        let mouse = {
+            x: 0,
+            y: 0,
+            movendo: false
+        };
+
+        let frameSprite = 0;
+        let tempoSprite = 0;
+        const velocidadeAnimacao = 6;
+
+        function ajustarCanvas() {
+
+            canvas.width = window.innerWidth * 0.95;
+            canvas.height = window.innerHeight * 0.95;
+
+
+            camera.width = canvas.width;
+            camera.height = canvas.height;
+
+
+            mundo.height = canvas.height;
+
+
+            criarPlataformas();
+            criarObjetos();
+
+        }
+
+        //  window.addEventListener("resize", ajustarCanvas);
+        //------------------------------------------------------
+        // MOVIMENTO DO MOUSE
+        //------------------------------------------------------
+
+
+        let temporizadorMouse;
+
+
+
+
+        canvas.addEventListener("mousemove", function (e) {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            mouse.movendo = true;
+            clearTimeout(temporizadorMouse);
+            temporizadorMouse = setTimeout(function () {
+                mouse.movendo = false;
+                frameSprite = 0;
+
+            }, 100);
+        });
+
+        ajustarCanvas();
+
+
+        //------------------------------------------------------
+        // CONTROLES
+        //------------------------------------------------------
+
+        let teclaPulo = false;
+        let teclas = {
+            esquerda: false,
+            direita: false
+
+        };
+
+        let subindoCorda = false;
+        let plataformaCorda = null;
+
+
+        let olhandoDireita = true;
+        document.addEventListener("keydown", function (e) {
+
+            if (e.code === "KeyV") {
+                mostrarComandosColetados = !mostrarComandosColetados;
+            }
+
+            if (e.code === "Space") {
+                teclaPulo = true;
+            }
+            if (e.code === "ArrowLeft") {
+                teclas.esquerda = true;
+            }
+            if (e.code === "ArrowRight") {
+                teclas.direita = true;
+            }
+            if (e.code === "ArrowUp") {
+                verificarCorda();
+            }
+        });
+
+
+        document.addEventListener("keyup", function (e) {
+            if (e.code === "ArrowLeft") {
+                teclas.esquerda = false;
+            }
+            if (e.code === "ArrowRight") {
+                teclas.direita = false;
+            }
+        });
+
+
+        //------------------------------------------------------
+        // PONTUAÇÃO
+        //------------------------------------------------------
+
+        let pontos = 0;
+        // controle da ordem
+        let proximoComando = 0;
+        // mensagem temporária
+        let mensagem = "";
+        let explicacaoMensagem = "";
+        let tempoMensagem = 0;
+
+
+
+
+        function mostrarMensagem(texto, explicacao = "") {
+            mensagem = texto;
+            explicacaoMensagem = explicacao;
+            tempoMensagem = 180; // 3 segundos
+        }
+
+
+
+
+        function verificarCorda() {
+            let melhorPlataforma = null;
+            let menorDistancia = Infinity;
+            for (let plataforma of plataformas) {
+                // plataforma acima do personagem
+                let acima = plataforma.y < player.y;
+                // mesma região horizontal
+                let alinhada =
+                    player.x + player.width / 2 >
+                    plataforma.x - 40 &&
+                    player.x + player.width / 2 <
+                    plataforma.x + plataforma.width + 40;
+                let distancia =
+                    player.y - plataforma.y;
+                if (
+                    acima &&
+                    alinhada &&
+                    distancia < mundo.height
+                ) {
+                    if (distancia < menorDistancia) {
+                        menorDistancia = distancia;
+                        melhorPlataforma = plataforma;
+                    }
+                }
+            }
+
+
+
+            if (melhorPlataforma) {
+                subindoCorda = true;
+                plataformaCorda = melhorPlataforma;
+            }
+
+        }
+
+        function iniciarJogo(numero) {
+
+            document.getElementById("menu").style.display = "none";
+            canvas.style.display = "block";
+
+            jogoIniciado = true;
+
+            if (numero == 1) {
+
+                algoritmoSQL = [
+                    {
+                        comando: "algoritmo soma",
+                        explicacao: "Inicia o algoritmo e define seu nome."
+                    },
+                    {
+                        comando: "var",
+                        explicacao: "Início da declaração das variáveis."
+                    },
+                    {
+                        comando: "num1, num2, resp: inteiro",
+                        explicacao: "Declara números inteiros."
+                    },
+                    {
+                        comando: "inicio",
+                        explicacao: "Inicia a execução."
+                    },
+                    {
+                        comando: "leia(num1)",
+                        explicacao: "Lê o primeiro número."
+                    },
+                    {
+                        comando: "leia(num2)",
+                        explicacao: "Lê o segundo número."
+                    },
+                    {
+                        comando: "resp<-num1+num2",
+                        explicacao: "Realiza a soma."
+                    },
+                    {
+                        comando: "escreva(resp)",
+                        explicacao: "Mostra o resultado."
+                    },
+                    {
+                        comando: "fimalgoritmo",
+                        explicacao: "Finaliza."
+                    }
+                ];
+
+            }
+
+
+            if (numero == 2) {
+
+                algoritmoSQL = [
+
+                    {
+                        comando: "algoritmo par_impar",
+                        explicacao: "Inicia o algoritmo."
+                    },
+                    {
+                        comando: "var",
+                        explicacao: "Declara variáveis."
+                    },
+                    {
+                        comando: "n: inteiro",
+                        explicacao: "Número inteiro."
+                    },
+                    {
+                        comando: "inicio",
+                        explicacao: "Começo da execução."
+                    },
+                    {
+                        comando: "leia(n)",
+                        explicacao: "Recebe um número."
+                    },
+                    {
+                        comando: "se n % 2 = 0 entao",
+                        explicacao: "Verifica se é par."
+                    },
+                    {
+                        comando: "escreva('PAR')",
+                        explicacao: "Mostra PAR."
+                    },
+                    {
+                        comando: "senao",
+                        explicacao: "Caso contrário."
+                    },
+                    {
+                        comando: "escreva('IMPAR')",
+                        explicacao: "Mostra ÍMPAR."
+                    },
+                    {
+                        comando: "fimse",
+                        explicacao: "Finaliza condição."
+                    },
+                    {
+                        comando: "fimalgoritmo",
+                        explicacao: "Finaliza algoritmo."
+                    }
+
+                ];
+
+            }
+
+            if (numero == 3) {
+
+    algoritmoSQL = [
+
+        {
+            comando: "algoritmo quadrado",
+            explicacao: "Inicia o algoritmo para calcular o quadrado de um número."
+        },
+        {
+            comando: "   var",
+            explicacao: "Inicia a declaração das variáveis."
+        },
+        {
+            comando: "   n: inteiro",
+            explicacao: "Declara a variável que armazenará o número."
+        },
+        {
+            comando: "inicio",
+            explicacao: "Começa a execução do algoritmo."
+        },
+        {
+            comando: "   leia(n)",
+            explicacao: "Lê o número informado pelo usuário."
+        },
+        {
+            comando: "   quadrado<-n*n",
+            explicacao: "Multiplica o número por ele mesmo."
+        },
+        {
+            comando: "   escreva(quadrado)",
+            explicacao: "Mostra o resultado do quadrado."
+        },
+        {
+            comando: "fimalgoritmo",
+            explicacao: "Finaliza o algoritmo."
+        }
+
+    ];
+
+}
+
+
+
+
+            total_comandos = algoritmoSQL.length;
+
+            pontos = 0;
+            proximoComando = 0;
+
+            criarPlataformas();
+            criarObjetos();
+
+
+            player.x = 50;
+            player.y = 100;
+            player.velY = 0;
+
+            camera.x = 0;
+
+        }
+        //------------------------------------------------------
+        // ATUALIZAÇÃO DO JOGO
+        //------------------------------------------------------
+        function atualizar() {
+            //----------------------------------
+            // MOVIMENTO HORIZONTAL
+            //----------------------------------
+            if (teclas.esquerda) {
+                player.x -= player.velocidadeX;
+                olhandoDireita = false;
+            }
+            if (teclas.direita) {
+                player.x += player.velocidadeX;
+                olhandoDireita = true;
+            }
+            //----------------------------------
+            // MOVIMENTO DA CÂMERA
+            //----------------------------------
+            let alvoCamera =
+                player.x - camera.width / 2;
+            camera.x +=
+                (alvoCamera - camera.x) *
+                camera.velocidade;
+            // limites da câmera
+            if (camera.x < 0)
+                camera.x = 0;
+            if (camera.x > mundo.width - camera.width)
+                camera.x = mundo.width - camera.width;
+            //----------------------------------
+            // LIMITAR TELA
+            //----------------------------------
+            //----------------------------------
+            // LIMITAR PELO TAMANHO DO MUNDO
+            //----------------------------------
+            if (player.x < 0) {
+                player.x = 0;
+
+            }
+            if (player.x + player.width > mundo.width) {
+                player.x = mundo.width - player.width;
+            }
+            //----------------------------------
+            // PULO
+            //----------------------------------
+            if (teclaPulo && player.noChao) {
+                player.velY = player.pulo;
+                player.noChao = false;
+            }
+            teclaPulo = false;
+            //----------------------------------
+            // SUBIR PELA CORDA
+            //----------------------------------
+            if (subindoCorda && plataformaCorda) {
+                player.velY = 0;
+                player.y -= 5;//velocidade subindo
+                // chegou na plataforma
+                if (player.y <= plataformaCorda.y - player.height) {
+                    player.y =
+                        plataformaCorda.y - player.height;
+                    subindoCorda = false;
+                    plataformaCorda = null;
+                    player.noChao = true;
+                }
+            }
+            //----------------------------------
+            // GRAVIDADE
+            //----------------------------------
+            player.velY += player.gravidade;
+            player.y += player.velY;
+            //----------------------------------
+            // NÃO ESTÁ APOIADO
+            //----------------------------------
+            player.noChao = false;
+            //----------------------------------
+            // COLISÃO COM AS PLATAFORMAS
+            //----------------------------------
+            for (let plataforma of plataformas) {
+
+                let horizontal =
+                    player.x + player.width - 28 > plataforma.x &&
+                    player.x + 28 < plataforma.x + plataforma.width;
+                let vertical =
+                    player.y + player.height >= plataforma.y &&
+                    player.y + player.height <= plataforma.y + player.velY + 5;
+                if (
+                    horizontal &&
+                    vertical &&
+                    player.velY >= 0
+                ) {
+                    player.y = plataforma.y - player.height;
+                    player.velY = 0;
+                    player.noChao = true;
+                }
+            }
+            //----------------------------------
+            // COLISÃO COM O CHÃO
+            //----------------------------------
+            if (player.y + player.height >= canvas.height) {
+                player.y = canvas.height - player.height;
+                player.velY = 0;
+                player.noChao = true;
+            }
+            //----------------------------------
+            // COLETAR OBJETOS
+            //----------------------------------
+            mostrarMensagem("APRENDENDO", "ALGORITMOS");
+
+            for (let objeto of objetos) {
+                if (!objeto.coletado) {
+                    let colisao =
+                        player.x < objeto.x + objeto.width &&
+                        player.x + player.width > objeto.x &&
+                        player.y < objeto.y + objeto.height &&
+                        player.y + player.height > objeto.y;
+                    if (colisao) {
+                        // verifica se é o comando correto
+                        if (objeto.texto === algoritmoSQL[proximoComando].comando) {
+                            objeto.coletado = true;
+                            const comando = comandos.find(
+                                c => c.texto === objeto.texto
+                            );
+                            if (comando) {
+                                comando.coletado = true;
+                                mostrarMensagem(
+                                    "Parabéns! Você coletou o comando corretamente.",
+                                    comando.explicacao
+                                );
+                            }
+                            proximoComando++;
+                            pontos++;
+
+                            if (pontos == total_comandos) {
+                                alert("Parabéns Você completou o Algoritmo")
+                                //proximoAlgoritmo(2);
+                                location.reload();
+                                player.x = 50;
+                                player.y = 100;
+                                player.velY = 0;
+
+                                camera.x = 0;
+                                camera.y = 0;
+                            }
+                        } else {
+
+                            mostrarMensagem(
+
+                                "Ordem incorreta!", objeto.texto + ":" + objeto.explicacao
+                            );
+
+                        }
+                    }
+                }
+            }
+            //----------------------------------
+            // DESENHAR TUDO
+            //----------------------------------
+            desenhar();
+            // mensagem temporária
+            if (tempoMensagem > 0) {
+                ctx.textAlign = "center";
+
+                // Primeira linha (vermelha)
+                ctx.fillStyle = "red";
+                ctx.font = "bold 30px Arial";
+                ctx.fillText(
+                    mensagem,
+                    canvas.width / 2,
+                    60
+                );
+
+                // Segunda linha (azul)
+                if (explicacaoMensagem !== "") {
+                    ctx.fillStyle = "blue";
+                    ctx.font = "22px Arial";
+                    ctx.fillText(
+                        explicacaoMensagem,
+                        canvas.width / 2,
+                        90
+                    );
+                }
+                tempoMensagem--;
+            }
+            requestAnimationFrame(atualizar);
+        }
+        function desenharSprite(img) {
+            if (!img.complete) return;
+            ctx.save();
+            if (olhandoDireita) {
+                ctx.drawImage(
+                    img,
+                    player.x,
+                    player.y,
+                    player.width,
+                    player.height
+                );
+            } else {
+                ctx.scale(-1, 1);
+                ctx.drawImage(
+                    img,
+                    -player.x - player.width,
+                    player.y,
+                    player.width,
+                    player.height
+                );
+            }
+            ctx.restore();
+        }
+        //------------------------------------------------------
+        // DESENHAR ELEMENTOS
+        //------------------------------------------------------
+
+
+        function desenharComandosColetados() {
+
+            if (!mostrarComandosColetados)
+                return;
+
+            const x = 20;
+            const y = 20;
+            const largura = 400;
+            const altura = 660;
+
+            ctx.save();
+
+            // Fundo semitransparente
+            ctx.fillStyle = "rgba(255,255,255,0.6)";
+            ctx.fillRect(x, y, largura, altura);
+
+            // Borda
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, largura, altura);
+
+            // Título
+            ctx.fillStyle = "#003366";
+            ctx.font = "bold 26px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText("Comandos coletados", x + 20, y + 35);
+
+            // Lista
+            ctx.font = "20px Consolas";
+            let linha = y + 70;
+
+            for (let i = 0; i < proximoComando; i++) {
+
+                ctx.fillStyle = "green";
+
+                ctx.fillText(
+                    algoritmoSQL[i].comando,
+                    x + 25,
+                    linha
+                );
+
+                linha += 28;
+            }
+
+            ctx.restore();
+        }
+
+        function desenharPainelMensagens() {
+
+            const alturaPainel = 120;
+            const margem = 0;
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+
+            ctx.fillRect(
+                0,
+                margem,
+                canvas.width - (margem * 2),
+                alturaPainel
+            );
+
+
+            ctx.strokeStyle = "#999";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                0,
+                margem,
+                canvas.width - (margem * 2),
+                alturaPainel
+            );
+        }
+
+
+        function desenhar() {
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            ctx.save();
+            const escala = mundo.width / fundo.width;
+
+            ctx.drawImage(
+                fundo,
+                -camera.x,
+                0,
+                mundo.width,
+                fundo.height * escala
+            );
+
+            // movimenta o mundo conforme a câmera
+            ctx.translate(
+                -camera.x,
+                -camera.y
+            );
+            //----------------------------------
+            // DESENHAR CORDA
+            //----------------------------------
+            if (subindoCorda && plataformaCorda) {
+                ctx.strokeStyle = "brown";
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(
+                    player.x + player.width / 2,
+                    player.y
+                );
+                ctx.lineTo(
+                    plataformaCorda.x + plataformaCorda.width / 2 + 12,
+                    plataformaCorda.y
+                );
+                ctx.stroke();
+            }
+
+            //------------------------------------------------------
+            // ATUALIZA SPRITE
+            //------------------------------------------------------
+            if (teclas.esquerda || teclas.direita) {
+                tempoSprite++;
+                if (tempoSprite >= velocidadeAnimacao) {
+                    tempoSprite = 0;
+                    frameSprite++;
+                    if (frameSprite >= TOTAL_SPRITES) {
+                        frameSprite = 0;
+                    }
+                }
+            } else {
+                frameSprite = 0;
+            }
+            //----------------------------------
+            // CHÃO
+            //----------------------------------
+            // ctx.fillStyle = "#BBBBBB";
+            //ctx.fillRect( 0, canvas.height - 5, canvas.width,    5  );
+            //----------------------------------
+            // PLATAFORMAS
+            //----------------------------------
+            ctx.fillStyle = "green";
+            for (let plataforma of plataformas) {
+                if (plataforma.tipo === "chao") {
+                    ctx.fillStyle = ctx.fillStyle = "rgba(0,0,0,0)"; // transparente                     
+                } else {
+                    ctx.fillStyle = "yellow";
+                }
+
+                ctx.fillRect(
+                    plataforma.x,
+                    plataforma.y,
+                    plataforma.width,
+                    plataforma.height
+                );
+                ctx.fillRect(
+                    plataforma.x,
+                    plataforma.y,
+                    plataforma.width,
+                    plataforma.height
+                );
+            }
+            //----------------------------------
+            // OBJETOS COLECIONÁVEIS
+            //----------------------------------
+            //----------------------------------
+            // TEXTOS DOS COMANDOS
+            //----------------------------------
+            ctx.font = "20px Arial";
+            ctx.textAlign = "center";
+
+            for (let comando of comandos) {
+
+                if (comando.coletado)
+                    continue;
+
+                // Fundo branco
+                ctx.fillStyle = "rgba(255,255,255,0.2)";
+                ctx.fillRect(
+                    comando.x - 5,
+                    comando.y,
+                    comando.width + 10,
+                    30
+                );
+
+
+
+                // Texto
+                ctx.fillStyle = "#003366";
+                ctx.fillText(
+                    comando.texto,
+                    comando.x + comando.width / 2,
+                    comando.y + 22
+                );
+
+
+
+            }
+            //----------------------------------
+            // PERSONAGEM
+            //----------------------------------
+            //    ctx.fillStyle = "blue";
+            //  ctx.fillRect(    player.x,  player.y, player.width,  player.height );
+            //----------------------------------
+            // PONTUAÇÃO
+            //----------------------------------
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.restore();
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText(
+                "Pontos: " + pontos,
+                60,
+                150
+            );
+
+
+
+
+            desenharPainelMensagens();
+
+
+            ctx.save();
+            ctx.translate(
+                -camera.x,
+                -camera.y
+            );
+            //------------------------------------------------------
+            // DESENHAR ANIMAÇÃO DO MOUSE
+            //------------------------------------------------------
+            // Se estiver no ar, mostra sprite de pulo
+            if (!player.noChao) {
+                if (spritePulo.complete) {
+                    // desenharSprite(spritePulo);   
+
+                    if (subindoCorda) {
+                        desenharSprite(spriteCorda);
+                    }
+                    else {
+                        desenharSprite(spritePulo);
+                    }
+
+                }
+            } else {
+                // No chão usa animação normal
+                if (sprites[frameSprite].complete) {
+                    desenharSprite(sprites[frameSprite]);
+                }
+            }
+
+
+            ctx.restore();
+            desenharComandosColetados();
+
+        }
+
+
+        //------------------------------------------------------
+        // INICIAR O JOGO
+        //------------------------------------------------------
+        atualizar();
+
+    </script>
+</body>
+
+</html>
