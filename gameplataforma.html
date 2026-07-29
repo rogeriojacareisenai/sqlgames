@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Plataforma</title>
@@ -85,6 +85,7 @@
     <script>
         let jogoIniciado = false;
         let mostrarComandosColetados = false;
+        let jogo = "";
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
         const ALTURA_CHAO = 165;
@@ -159,7 +160,7 @@
             }
         ];
 
-        
+
 
 
         var total_comandos = algoritmoSQL.length
@@ -464,7 +465,7 @@
             jogoIniciado = true;
 
             if (numero == 1) {
-
+                jogo = "Somar 2 números inteiros";
                 algoritmoSQL = [
                     {
                         comando: "algoritmo soma",
@@ -508,7 +509,7 @@
 
 
             if (numero == 2) {
-
+                jogo = "Identificar se um número é par ou ímpar";
                 algoritmoSQL = [
 
                     {
@@ -561,45 +562,45 @@
             }
 
             if (numero == 3) {
+                jogo="Calcular o quadrado de um número";
+                algoritmoSQL = [
 
-    algoritmoSQL = [
+                    {
+                        comando: "algoritmo quadrado",
+                        explicacao: "Inicia o algoritmo para calcular o quadrado de um número."
+                    },
+                    {
+                        comando: "   var",
+                        explicacao: "Inicia a declaração das variáveis."
+                    },
+                    {
+                        comando: "   n: inteiro",
+                        explicacao: "Declara a variável que armazenará o número."
+                    },
+                    {
+                        comando: "inicio",
+                        explicacao: "Começa a execução do algoritmo."
+                    },
+                    {
+                        comando: "   leia(n)",
+                        explicacao: "Lê o número informado pelo usuário."
+                    },
+                    {
+                        comando: "   quadrado<-n*n",
+                        explicacao: "Multiplica o número por ele mesmo."
+                    },
+                    {
+                        comando: "   escreva(quadrado)",
+                        explicacao: "Mostra o resultado do quadrado."
+                    },
+                    {
+                        comando: "fimalgoritmo",
+                        explicacao: "Finaliza o algoritmo."
+                    }
 
-        {
-            comando: "algoritmo quadrado",
-            explicacao: "Inicia o algoritmo para calcular o quadrado de um número."
-        },
-        {
-            comando: "   var",
-            explicacao: "Inicia a declaração das variáveis."
-        },
-        {
-            comando: "   n: inteiro",
-            explicacao: "Declara a variável que armazenará o número."
-        },
-        {
-            comando: "inicio",
-            explicacao: "Começa a execução do algoritmo."
-        },
-        {
-            comando: "   leia(n)",
-            explicacao: "Lê o número informado pelo usuário."
-        },
-        {
-            comando: "   quadrado<-n*n",
-            explicacao: "Multiplica o número por ele mesmo."
-        },
-        {
-            comando: "   escreva(quadrado)",
-            explicacao: "Mostra o resultado do quadrado."
-        },
-        {
-            comando: "fimalgoritmo",
-            explicacao: "Finaliza o algoritmo."
-        }
+                ];
 
-    ];
-
-}
+            }
 
 
 
@@ -717,7 +718,7 @@
             //----------------------------------
             // COLISÃO COM O CHÃO
             //----------------------------------
-            if (player.y + player.height >= canvas.height-ALTURA_CHAO) {
+            if (player.y + player.height >= canvas.height - ALTURA_CHAO) {
                 player.y = canvas.height - player.height - ALTURA_CHAO;
                 player.velY = 0;
                 player.noChao = true;
@@ -725,7 +726,7 @@
             //----------------------------------
             // COLETAR OBJETOS
             //----------------------------------
-            mostrarMensagem("APRENDENDO", "ALGORITMOS");
+            mostrarMensagem("APRENDENDO", "ALGORITMO [ "+jogo+" ]");
 
             for (let objeto of objetos) {
                 if (!objeto.coletado) {
@@ -974,7 +975,7 @@
             for (let plataforma of plataformas) {
                 if (plataforma.tipo === "chao") {
                     ctx.fillStyle = ctx.fillStyle = "rgba(0,0,0,0)"; // transparente                     
-                       ctx.fillStyle = "yellow";
+                    ctx.fillStyle = "yellow";
                 } else {
                     ctx.fillStyle = "yellow";
                 }
