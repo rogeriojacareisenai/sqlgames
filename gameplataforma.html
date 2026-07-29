@@ -87,7 +87,7 @@
         let mostrarComandosColetados = false;
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
-        const ALTURA_CHAO = 140;
+        const ALTURA_CHAO = 165;
         //------------------------------------------------------
         // PERSONAGEM
         //------------------------------------------------------
@@ -246,7 +246,7 @@
             // ============================
             plataformas.push({
                 x: 0,
-                y: canvas.height - ALTURA_CHAO+10,
+                y: canvas.height - ALTURA_CHAO,
                 width: mundo.width,
                 height: 2,
                 tipo: "chao"
