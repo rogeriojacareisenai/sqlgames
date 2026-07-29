@@ -87,6 +87,7 @@
         let mostrarComandosColetados = false;
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
+        const ALTURA_CHAO = 165;
         //------------------------------------------------------
         // PERSONAGEM
         //------------------------------------------------------
@@ -179,7 +180,7 @@
             const MARGEM_TETO = 200;
             const MARGEM_CHAO = 200;
 
-            const yChao = canvas.height - 258;
+            const yChao = canvas.height - ALTURA_CHAO;
 
             let alturaMin = MARGEM_TETO;
             let alturaMax = yChao - MARGEM_CHAO;
@@ -245,7 +246,7 @@
             // ============================
             plataformas.push({
                 x: 0,
-                y: canvas.height - 165,
+                y: canvas.height - ALTURA_CHAO,
                 width: mundo.width,
                 height: 2,
                 tipo: "chao"
@@ -716,8 +717,8 @@
             //----------------------------------
             // COLISÃO COM O CHÃO
             //----------------------------------
-            if (player.y + player.height >= canvas.height) {
-                player.y = canvas.height - player.height;
+            if (player.y + player.height >= canvas.height-ALTURA_CHAO) {
+                player.y = canvas.height - player.height - ALTURA_CHAO;
                 player.velY = 0;
                 player.noChao = true;
             }
