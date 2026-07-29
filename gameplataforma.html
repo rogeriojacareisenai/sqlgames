@@ -179,7 +179,7 @@
             const MARGEM_TETO = 200;
             const MARGEM_CHAO = 200;
 
-            const yChao = canvas.height ;
+            const yChao = canvas.height - 258;
 
             let alturaMin = MARGEM_TETO;
             let alturaMax = yChao - MARGEM_CHAO;
@@ -245,7 +245,7 @@
             // ============================
             plataformas.push({
                 x: 0,
-                y: canvas.height - 300,
+                y: canvas.height - 165,
                 width: mundo.width,
                 height: 2,
                 tipo: "chao"
@@ -289,10 +289,10 @@
         }
 
         const spritePulo = new Image();
-        spritePulo.src = "sprite_09.png";
+        spritePulo.src = "anima/sprite_09.png";
 
         const spriteCorda = new Image();
-        spriteCorda.src = "corda.png";
+        spriteCorda.src = "anima/corda.png";
 
         let mouse = {
             x: 0,
