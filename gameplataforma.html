@@ -417,18 +417,46 @@
 
 
         canvas.addEventListener("mousemove", function (e) {
+
             const rect = canvas.getBoundingClientRect();
+
             mouse.x = e.clientX - rect.left;
             mouse.y = e.clientY - rect.top;
             mouse.movendo = true;
+
+            // posição real considerando a câmera
+            const mouseX = mouse.x + camera.x;
+            const mouseY = mouse.y;
+
+            let sobreComando = false;
+
+            for (let comando of comandos) {
+
+                if (comando.coletado) continue;
+
+                if (
+                    mouseX >= comando.x &&
+                    mouseX <= comando.x + comando.width &&
+                    mouseY >= comando.y &&
+                    mouseY <= comando.y + comando.height
+                ) {
+                    sobreComando = true;
+                    break;
+                }
+            }
+
+            // altera o cursor do mouse
+            canvas.style.cursor = sobreComando ? "pointer" : "default";
+
+
             clearTimeout(temporizadorMouse);
+
             temporizadorMouse = setTimeout(function () {
                 mouse.movendo = false;
                 frameSprite = 0;
-
             }, 100);
-        });
 
+        });
         ajustarCanvas();
 
 
@@ -565,7 +593,7 @@
 
         }
 
-        
+
 
         function iniciarJogo(numero) {
 
@@ -910,7 +938,7 @@
                 ctx.font = "bold 50px Arial";
                 ctx.fillText(
                     mensagem,
-                    canvas.width / 2-4,
+                    canvas.width / 2 - 4,
                     86
                 );
 
@@ -941,20 +969,20 @@
                 tempoMensagemErro--;
             }
             else
-            if (tempoExplicacaoClique > 0) {
+                if (tempoExplicacaoClique > 0) {
 
-                ctx.fillStyle = "cyan";
-                ctx.font = "bold 22px Arial";
-                ctx.textAlign = "center";
+                    ctx.fillStyle = "cyan";
+                    ctx.font = "bold 22px Arial";
+                    ctx.textAlign = "center";
 
-                ctx.fillText(
-                    explicacaoClique,
-                    canvas.width / 2,
-                    canvas.height - ALTURA_CHAO + 80
-                );
+                    ctx.fillText(
+                        explicacaoClique,
+                        canvas.width / 2,
+                        canvas.height - ALTURA_CHAO + 80
+                    );
 
-                tempoExplicacaoClique--;
-            }
+                    tempoExplicacaoClique--;
+                }
 
             requestAnimationFrame(atualizar);
         }
@@ -1201,7 +1229,7 @@
                 150
             );
             desenharPainelMensagens();
-           ctx.save();
+            ctx.save();
             ctx.translate(
                 -camera.x,
                 -camera.y
