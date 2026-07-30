@@ -58,12 +58,59 @@
         #game {
             display: none;
         }
+
+
+        #menu {
+            position: absolute;
+            width: 400px;
+            padding: 40px;
+            background-color: white;
+            border: 3px solid #003366;
+            border-radius: 15px;
+            text-align: center;
+            font-family: Arial;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        /* Marca d'água do SENAI */
+        #menu::before {
+            content: "";
+
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background-image: url("anima/logosenai.png");
+            background-repeat: repeat;
+
+            /* Tamanho de cada logo */
+            background-size: 75px;
+
+            /* Transparência */
+            opacity: 0.05;
+
+            z-index: 0;
+        }
+
+        /* Mantém o conteúdo do menu acima da marca d'água */
+        #menu h1,
+        #menu button {
+            position: relative;
+            z-index: 1;
+        }
     </style>
 </head>
 
 <body>
 
     <div id="menu">
+
+        <img src="anima/logosenai.png" width="150" height="80" id="logoMenu">
+
         <h1>Jogo de Algoritmos</h1>
 
         <button onclick="iniciarJogo(1)">
@@ -89,6 +136,11 @@
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
         const ALTURA_CHAO = 165;
+
+        const logoSenai = new Image();
+        logoSenai.src = "anima/logosenai.png";
+
+
         //------------------------------------------------------
         // PERSONAGEM
         //------------------------------------------------------
@@ -457,6 +509,33 @@
 
         }
 
+
+        function desenharLogoSenai() {
+
+            if (!logoSenai.complete)
+                return;
+
+            const largura = 180;
+            const altura = 60;
+            const margem = 15;
+
+            ctx.save();
+
+            // logo
+            ctx.drawImage(
+                logoSenai,
+                canvas.width - largura - margem - 20,
+                20 + margem,
+                largura,
+                altura
+            );
+
+            ctx.restore();
+
+        }
+
+
+
         function iniciarJogo(numero) {
 
             document.getElementById("menu").style.display = "none";
@@ -562,7 +641,7 @@
             }
 
             if (numero == 3) {
-                jogo="Calcular o quadrado de um número";
+                jogo = "Calcular o quadrado de um número";
                 algoritmoSQL = [
 
                     {
@@ -726,7 +805,7 @@
             //----------------------------------
             // COLETAR OBJETOS
             //----------------------------------
-            mostrarMensagem("APRENDENDO", "ALGORITMO [ "+jogo+" ]");
+            mostrarMensagem("APRENDENDO", "ALGORITMO [ " + jogo + " ]");
 
             for (let objeto of objetos) {
                 if (!objeto.coletado) {
@@ -1085,6 +1164,7 @@
 
             ctx.restore();
             desenharComandosColetados();
+            desenharLogoSenai();
 
         }
 
