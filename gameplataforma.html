@@ -136,6 +136,9 @@
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
         const ALTURA_CHAO = 165;
+        let explicacaoClique = "";
+        let tempoExplicacaoClique = 0;
+
 
         const logoSenai = new Image();
         logoSenai.src = "anima/logosenai.png";
@@ -384,7 +387,33 @@
 
         let temporizadorMouse;
 
+        canvas.addEventListener("click", function (e) {
 
+            const rect = canvas.getBoundingClientRect();
+
+            const mouseX = e.clientX - rect.left + camera.x;
+            const mouseY = e.clientY - rect.top;
+
+            for (let comando of comandos) {
+
+                // ignora os já coletados
+                if (comando.coletado) continue;
+
+                if (
+                    mouseX >= comando.x &&
+                    mouseX <= comando.x + comando.width &&
+                    mouseY >= comando.y &&
+                    mouseY <= comando.y + comando.height
+                ) {
+
+                    explicacaoClique = comando.explicacao;
+                    tempoExplicacaoClique = 300; // 5 segundos
+
+                    break;
+                }
+            }
+
+        });
 
 
         canvas.addEventListener("mousemove", function (e) {
@@ -461,6 +490,8 @@
         let mensagem = "";
         let explicacaoMensagem = "";
         let tempoMensagem = 0;
+        let mensagemErro = "";
+        let tempoMensagemErro = 0;
 
 
 
@@ -528,6 +559,65 @@
                 20 + margem,
                 largura,
                 altura
+            );
+
+            ctx.restore();
+
+        }
+
+        function desenharBalaoHQ(texto) {
+
+            if (tempoMensagem <= 0 || texto === "")
+                return;
+
+            const largura = 320;
+            const altura = 80;
+
+            // posição do balão
+            const x = player.x + (player.width / 2) - (largura / 2) - camera.x;
+            const y = player.y - 110;
+
+            ctx.save();
+
+            // sombra
+            ctx.shadowColor = "rgba(0,0,0,0.25)";
+            ctx.shadowBlur = 8;
+
+            // fundo do balão
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.roundRect(x, y, largura, altura, 15);
+            ctx.fill();
+
+            // borda
+            ctx.shadowBlur = 0;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "black";
+            ctx.stroke();
+
+            // seta do balão
+            ctx.beginPath();
+            ctx.moveTo(x + 140, y + altura);
+            ctx.lineTo(x + 160, y + altura);
+            ctx.lineTo(
+                player.x + player.width / 2 - camera.x,
+                player.y - 10
+            );
+            ctx.closePath();
+
+            ctx.fillStyle = "white";
+            ctx.fill();
+            ctx.stroke();
+
+            // texto
+            ctx.fillStyle = "red";
+            ctx.font = "bold 22px Arial";
+            ctx.textAlign = "center";
+
+            ctx.fillText(
+                texto,
+                x + largura / 2,
+                y + 45
             );
 
             ctx.restore();
@@ -844,12 +934,16 @@
                             }
                         } else {
 
-                            mostrarMensagem(
+                            mensagemErro =
+                                "ORDEM INCORRETA! " +
+                                objeto.texto +
+                                " : " +
+                                objeto.explicacao;
 
-                                "Ordem incorreta!", objeto.texto + ":" + objeto.explicacao
-                            );
+                            tempoMensagemErro = 180;
 
                         }
+
                     }
                 }
             }
@@ -872,16 +966,46 @@
 
                 // Segunda linha (azul)
                 if (explicacaoMensagem !== "") {
-                    ctx.fillStyle = "blue";
+                    ctx.fillStyle = "yellow";
                     ctx.font = "22px Arial";
                     ctx.fillText(
                         explicacaoMensagem,
                         canvas.width / 2,
-                        90
+                        canvas.height - ALTURA_CHAO + 50
                     );
                 }
                 tempoMensagem--;
             }
+            if (tempoMensagemErro > 0) {
+
+                ctx.fillStyle = "red";
+                ctx.font = "bold 22px Arial";
+                ctx.textAlign = "center";
+
+                ctx.fillText(
+                    mensagemErro,
+                    canvas.width / 2,
+                    canvas.height - ALTURA_CHAO + 80
+                );
+
+                tempoMensagemErro--;
+            }
+            else
+            if (tempoExplicacaoClique > 0) {
+
+                ctx.fillStyle = "cyan";
+                ctx.font = "bold 22px Arial";
+                ctx.textAlign = "center";
+
+                ctx.fillText(
+                    explicacaoClique,
+                    canvas.width / 2,
+                    canvas.height - ALTURA_CHAO + 80
+                );
+
+                tempoExplicacaoClique--;
+            }
+
             requestAnimationFrame(atualizar);
         }
         function desenharSprite(img) {
