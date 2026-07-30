@@ -565,66 +565,7 @@
 
         }
 
-        function desenharBalaoHQ(texto) {
-
-            if (tempoMensagem <= 0 || texto === "")
-                return;
-
-            const largura = 320;
-            const altura = 80;
-
-            // posição do balão
-            const x = player.x + (player.width / 2) - (largura / 2) - camera.x;
-            const y = player.y - 110;
-
-            ctx.save();
-
-            // sombra
-            ctx.shadowColor = "rgba(0,0,0,0.25)";
-            ctx.shadowBlur = 8;
-
-            // fundo do balão
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.roundRect(x, y, largura, altura, 15);
-            ctx.fill();
-
-            // borda
-            ctx.shadowBlur = 0;
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = "black";
-            ctx.stroke();
-
-            // seta do balão
-            ctx.beginPath();
-            ctx.moveTo(x + 140, y + altura);
-            ctx.lineTo(x + 160, y + altura);
-            ctx.lineTo(
-                player.x + player.width / 2 - camera.x,
-                player.y - 10
-            );
-            ctx.closePath();
-
-            ctx.fillStyle = "white";
-            ctx.fill();
-            ctx.stroke();
-
-            // texto
-            ctx.fillStyle = "red";
-            ctx.font = "bold 22px Arial";
-            ctx.textAlign = "center";
-
-            ctx.fillText(
-                texto,
-                x + largura / 2,
-                y + 45
-            );
-
-            ctx.restore();
-
-        }
-
-
+        
 
         function iniciarJogo(numero) {
 
@@ -895,7 +836,7 @@
             //----------------------------------
             // COLETAR OBJETOS
             //----------------------------------
-            mostrarMensagem("APRENDENDO", "ALGORITMO [ " + jogo + " ]");
+            mostrarMensagem("ALGORITMOS", "ALGORITMO [ " + jogo + " ]");
 
             for (let objeto of objetos) {
                 if (!objeto.coletado) {
@@ -956,12 +897,21 @@
                 ctx.textAlign = "center";
 
                 // Primeira linha (vermelha)
-                ctx.fillStyle = "red";
-                ctx.font = "bold 30px Arial";
+                ctx.fillStyle = "gray";
+                ctx.font = "bold 50px Arial";
                 ctx.fillText(
                     mensagem,
                     canvas.width / 2,
-                    60
+                    90
+                );
+
+                // Primeira linha (vermelha)
+                ctx.fillStyle = "white";
+                ctx.font = "bold 50px Arial";
+                ctx.fillText(
+                    mensagem,
+                    canvas.width / 2-4,
+                    86
                 );
 
                 // Segunda linha (azul)
@@ -1250,14 +1200,8 @@
                 60,
                 150
             );
-
-
-
-
             desenharPainelMensagens();
-
-
-            ctx.save();
+           ctx.save();
             ctx.translate(
                 -camera.x,
                 -camera.y
